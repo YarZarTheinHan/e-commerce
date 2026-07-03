@@ -2,6 +2,7 @@ package com.example.ecommerce.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -37,6 +38,20 @@ public class CategoryServiceImpl implements CategoryService{
 
         categories.remove(category);
         return "Category ID deleted successfully";
+    }
+
+    @Override
+    public Category updateCategory(Category category, Long categoryId){
+        Optional<Category> optionalCategory = categories.stream().filter
+        (c -> c.getCategoryId() == categoryId).findFirst();
+        if(optionalCategory.isPresent()){
+            Category existingCategory = optionalCategory.get();
+            existingCategory.setCategoryName(category.getCategoryName());
+            return existingCategory;
+        } else{
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Category Not Found To Update");
+        }
+
     }
     
 

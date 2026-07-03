@@ -1,6 +1,4 @@
 package com.example.ecommerce.controller;
-
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.web.bind.annotation.RestController;
@@ -15,10 +13,12 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 
-
+@RequestMapping("api/")
 @RestController
 public class CategoryController {
 
@@ -28,19 +28,19 @@ public class CategoryController {
         this.categoryService = categoryService;
     }
 
-    @GetMapping("api/public/categories")
+    @GetMapping("public/categories")
     public ResponseEntity<List<Category>> getAllCategories() {
         List<Category> categories = categoryService.getAllCategories();
         return ResponseEntity.ok(categories);
     }
 
-    @PostMapping("api/public/categories")
+    @PostMapping("public/categories")
     public ResponseEntity<String> createCategory(@RequestBody Category category) {
         categoryService.createCategory(category);
         return new ResponseEntity<>("Added category successfully!", HttpStatus.CREATED);
     }
 
-    @DeleteMapping("api/admin/categories/{categoryId}")
+    @DeleteMapping("admin/categories/{categoryId}")
     public  ResponseEntity<String> deleteCategory(@PathVariable Long categoryId){
         try{
         String status = categoryService.deleteCategory(categoryId);
@@ -50,6 +50,15 @@ public class CategoryController {
         }
     }
     
+    @PutMapping("public/categories/{categoryId}")
+    public ResponseEntity<String> updateCategory(@RequestBody Category category, @PathVariable Long categoryId){
+    try{
+        Category updateCategory = categoryService.updateCategory(category, categoryId);
+        return new ResponseEntity<>("Updated Category Id:" + categoryId, HttpStatus.ACCEPTED);
+    } catch(ResponseStatusException e){
+       return  new ResponseEntity<>(e.getReason(), e.getStatusCode());
+    }
+  }
     
 
 }
