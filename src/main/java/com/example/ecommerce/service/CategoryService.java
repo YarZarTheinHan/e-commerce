@@ -7,7 +7,7 @@ import com.example.ecommerce.model.Category;
 public interface CategoryService {
     List<Category> getAllCategories();
 
-    String createCategory(Category category);
+    void createCategory(Category category);
 
     String deleteCategory(long categoryId);
 
