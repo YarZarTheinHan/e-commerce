@@ -7,6 +7,8 @@ import org.springframework.web.server.ResponseStatusException;
 import com.example.ecommerce.model.Category;
 import com.example.ecommerce.service.CategoryService;
 
+import jakarta.validation.Valid;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -35,7 +37,7 @@ public class CategoryController {
     }
 
     @PostMapping("public/categories")
-    public ResponseEntity<String> createCategory(@RequestBody Category category) {
+    public ResponseEntity<String> createCategory(@Valid @RequestBody Category category) {
         categoryService.createCategory(category);
         return new ResponseEntity<>("Added category successfully!", HttpStatus.CREATED);
     }

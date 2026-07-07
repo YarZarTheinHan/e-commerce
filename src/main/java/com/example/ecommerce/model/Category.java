@@ -18,6 +18,6 @@ public class Category {
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Long categoryId;
 
-    // @NotBlank
+    @NotBlank
     private String categoryName;
 }
