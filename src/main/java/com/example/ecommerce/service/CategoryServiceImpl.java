@@ -2,13 +2,15 @@ package com.example.ecommerce.service;
 
 import java.util.List;
 
-import org.springframework.http.HttpStatus;
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import com.example.ecommerce.exceptions.APIException;
 import com.example.ecommerce.exceptions.ResourceNotFoundException;
 import com.example.ecommerce.model.Category;
+import com.example.ecommerce.payload.CategoryDTO;
+import com.example.ecommerce.payload.CategoryResponseDTO;
 import com.example.ecommerce.repository.CategoryRepository;
 
 @Service
@@ -20,12 +22,20 @@ public class CategoryServiceImpl implements CategoryService{
         this.categoryRepository = categoryRepository;
     }
 
+    @Autowired
+    private ModelMapper modelMapper;
+
     @Override
-    public List<Category> getAllCategories() {
+    public CategoryResponseDTO getAllCategories() {
         List<Category> findAllCategory = categoryRepository.findAll();
         int sizeOfList = findAllCategory.size();
         if(sizeOfList > 0 ){
-            return findAllCategory;
+           List<CategoryDTO> categoryDTOs = findAllCategory.stream().map(category -> modelMapper
+            .map(findAllCategory, CategoryDTO.class)).toList();
+
+            CategoryResponseDTO categoryResponseDTO = new CategoryResponseDTO();
+            categoryResponseDTO.setCategories(categoryDTOs);
+            return categoryResponseDTO;
         }
         throw new APIException("Category does not exist");
     }
