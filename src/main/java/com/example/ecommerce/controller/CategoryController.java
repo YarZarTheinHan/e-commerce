@@ -39,9 +39,9 @@ public class CategoryController {
     }
 
     @PostMapping("public/categories")
-    public ResponseEntity<String> createCategory(@Valid @RequestBody Category category) {
-        categoryService.createCategory(category);
-        return new ResponseEntity<>("Added category successfully!", HttpStatus.CREATED);
+    public ResponseEntity<CategoryDTO> createCategory(@Valid @RequestBody CategoryDTO categoryDTO) {
+        categoryService.createCategory(categoryDTO);
+        return new ResponseEntity<>(categoryDTO, HttpStatus.CREATED);
     }
 
     @DeleteMapping("admin/categories/{categoryId}")
@@ -55,6 +55,4 @@ public class CategoryController {
         Category updateCategory = categoryService.updateCategory(category, categoryId);
         return new ResponseEntity<>("Updated Category Id:" + categoryId, HttpStatus.ACCEPTED);
   }
-    
-
 }
