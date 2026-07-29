@@ -52,11 +52,11 @@ public class CategoryServiceImpl implements CategoryService{
     }
 
     @Override
-    public String deleteCategory(long categoryId){
+    public CategoryDTO deleteCategory(long categoryId){
         Category category = categoryRepository.findById(categoryId).orElseThrow(() -> new ResourceNotFoundException(
             "Category", "CategoryId",categoryId));
         categoryRepository.delete(category);
-        return "Category ID deleted successfully";
+        return modelMapper.map(category, CategoryDTO.class);
     }
 
     @Override
@@ -66,6 +66,10 @@ public class CategoryServiceImpl implements CategoryService{
 
         Category category = modelMapper.map(categoryDTO, Category.class);
         category.setCategoryId(categoryId);
+        Category checkDuplicateName = categoryRepository.findByCategoryName(categoryDTO.getCategoryName());
+        if(checkDuplicateName != null) {
+             throw new APIException("Category Named "+category.getCategoryName()+" already exist!");
+        }
         savedCategory = categoryRepository.save(category);
         return modelMapper.map(savedCategory, CategoryDTO.class);
     }

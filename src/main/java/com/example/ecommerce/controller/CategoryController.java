@@ -1,10 +1,7 @@
 package com.example.ecommerce.controller;
-import java.util.List;
 
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
-import com.example.ecommerce.model.Category;
 import com.example.ecommerce.payload.CategoryDTO;
 import com.example.ecommerce.payload.CategoryResponseDTO;
 import com.example.ecommerce.service.CategoryService;
@@ -20,6 +17,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestMethod;
+
+
 
 
 @RequestMapping("api/")
@@ -30,6 +31,15 @@ public class CategoryController {
 
     public CategoryController(CategoryService categoryService) {
         this.categoryService = categoryService;
+    }
+
+    public String requestMethodName(@RequestParam String param) {
+        return new String();
+    }
+
+    @GetMapping("/echo")
+    public ResponseEntity<String> testParameter(@RequestParam(name="name", defaultValue = "Hi Default") String name){
+        return ResponseEntity.ok("Parameter Value: "+name);
     }
 
     @GetMapping("public/categories")
@@ -45,9 +55,9 @@ public class CategoryController {
     }
 
     @DeleteMapping("admin/categories/{categoryId}")
-    public  ResponseEntity<String> deleteCategory(@PathVariable Long categoryId){
-        String status = categoryService.deleteCategory(categoryId);
-        return ResponseEntity.ok(status);
+    public  ResponseEntity<CategoryDTO> deleteCategory(@PathVariable Long categoryId){
+        CategoryDTO categoryDTO = categoryService.deleteCategory(categoryId);
+        return ResponseEntity.ok(categoryDTO);
     }
     
     @PutMapping("public/categories/{categoryId}")
