@@ -2,6 +2,7 @@ package com.example.ecommerce.controller;
 
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.ecommerce.config.AppConstant;
 import com.example.ecommerce.payload.CategoryDTO;
 import com.example.ecommerce.payload.CategoryResponseDTO;
 import com.example.ecommerce.service.CategoryService;
@@ -43,8 +44,13 @@ public class CategoryController {
     }
 
     @GetMapping("public/categories")
-    public ResponseEntity<CategoryResponseDTO> getAllCategories() {
-        CategoryResponseDTO categoryResponse = categoryService.getAllCategories();
+    public ResponseEntity<CategoryResponseDTO> getAllCategories(
+        @RequestParam(name = "pageSize", defaultValue=AppConstant.PAGE_SIZE, required = false) Integer pageSize,
+        @RequestParam(name = "pageNumber", defaultValue=AppConstant.PAGE_NUMBER, required = false) Integer pageNumber,
+        @RequestParam(name = "sortBy", defaultValue = AppConstant.SORT_BY, required = false) String sortBy,
+        @RequestParam(name = "sortOrder", defaultValue = AppConstant.SORT_ORDER) String sortOrder
+    ) {
+        CategoryResponseDTO categoryResponse = categoryService.getAllCategories(pageSize, pageNumber, sortBy, sortOrder);
         return ResponseEntity.ok(categoryResponse);
     }
 

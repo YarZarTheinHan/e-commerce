@@ -4,6 +4,10 @@ import java.util.List;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.example.ecommerce.exceptions.APIException;
@@ -26,8 +30,14 @@ public class CategoryServiceImpl implements CategoryService{
     private final ModelMapper modelMapper;
 
     @Override
-    public CategoryResponseDTO getAllCategories() {
-        List<Category> findAllCategory = categoryRepository.findAll();
+    public CategoryResponseDTO getAllCategories(Integer pageSize, Integer pageNumber, String sortBy, String sortOrder) {
+        Sort sortByOrder = sortOrder.equalsIgnoreCase("acs") ? 
+        Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        
+        Pageable pageDetails = PageRequest.of(pageNumber, pageSize, sortByOrder);
+        Page<Category> pageCategory = categoryRepository.findAll(pageDetails);
+        List<Category> findAllCategory = pageCategory.getContent();
+       // List<Category> findAllCategory = categoryRepository.findAll();
         int sizeOfList = findAllCategory.size();
         if(sizeOfList > 0 ){
            List<CategoryDTO> categoryDTOs = findAllCategory.stream().map(category -> modelMapper
@@ -35,6 +45,11 @@ public class CategoryServiceImpl implements CategoryService{
 
             CategoryResponseDTO categoryResponseDTO = new CategoryResponseDTO();
             categoryResponseDTO.setCategories(categoryDTOs);
+            categoryResponseDTO.setPageNumber(pageNumber);
+            categoryResponseDTO.setPageSize(pageSize);
+            categoryResponseDTO.setTotalElement(pageCategory.getTotalElements());
+            categoryResponseDTO.setTotalPages(pageCategory.getTotalPages());
+            categoryResponseDTO.setLastPage(pageCategory.isLast());
             return categoryResponseDTO;
         }
         throw new APIException("Category does not exist");
