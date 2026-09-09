@@ -38,11 +38,6 @@ public class CategoryController {
         return new String();
     }
 
-    @GetMapping("/echo")
-    public ResponseEntity<String> testParameter(@RequestParam(name="name", defaultValue = "Hi Default") String name){
-        return ResponseEntity.ok("Parameter Value: "+name);
-    }
-
     @GetMapping("public/categories")
     public ResponseEntity<CategoryResponseDTO> getAllCategories(
         @RequestParam(name = "pageSize", defaultValue=AppConstant.PAGE_SIZE, required = false) Integer pageSize,
