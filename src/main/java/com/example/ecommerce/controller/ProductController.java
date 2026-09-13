@@ -3,7 +3,6 @@ package com.example.ecommerce.controller;
 
 import com.example.ecommerce.repository.ProductRepository;
 
-import org.apache.catalina.connector.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -34,9 +33,9 @@ public class ProductController {
 
     @PostMapping("/admin/categories/{categoryId}/product")
     public ResponseEntity<ProductDTO> addProduct(@PathVariable Long categoryId,
-                                                @RequestBody  Product product){
-        ProductDTO productDTO = productService.addProduct(categoryId, product);
-        return new ResponseEntity<>(productDTO, HttpStatus.CREATED);
+                                                @RequestBody  ProductDTO productDTO){
+        ProductDTO savedProductDTO = productService.addProduct(categoryId, productDTO);
+        return new ResponseEntity<>(savedProductDTO, HttpStatus.CREATED);
     }
 
     @GetMapping("/public/products")
@@ -58,8 +57,8 @@ public class ProductController {
     }
 
     @PutMapping("/admin/products/{productId}")
-    public ResponseEntity<ProductDTO> updateProducts(@RequestBody Product product, @PathVariable Long productId){
-        ProductDTO productDTO = productService.updateProducts(product, productId);
+    public ResponseEntity<ProductDTO> updateProducts(@RequestBody ProductDTO productDTO, @PathVariable Long productId){
+        ProductDTO savedProductDTO = productService.updateProducts(productDTO, productId);
         return new ResponseEntity<>(productDTO, HttpStatus.OK);
     }
 

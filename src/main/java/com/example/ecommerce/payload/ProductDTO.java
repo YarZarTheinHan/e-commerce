@@ -18,9 +18,9 @@ public class ProductDTO {
 
     private Integer quantity;
 
-    private double price;
+    private Double price;
 
-    private double discount;
+    private Double discount;
 
-    private double specialPrice;
+    private Double specialPrice;
 }
