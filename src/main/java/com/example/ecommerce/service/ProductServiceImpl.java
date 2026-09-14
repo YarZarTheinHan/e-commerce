@@ -1,10 +1,16 @@
 package com.example.ecommerce.service;
 
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
+import java.util.UUID;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.ecommerce.exceptions.ResourceNotFoundException;
 import com.example.ecommerce.model.Category;
@@ -99,5 +105,40 @@ public class ProductServiceImpl implements ProductService{
        .orElseThrow(()-> new ResourceNotFoundException("Product","Product Id", productId));
        productRepository.delete(product);
        return mapper.map(product, ProductDTO.class);
+    }
+
+    @Override
+    public ProductDTO updateProductImage(Long productId, MultipartFile file) throws IOException {
+        //Take the product 
+        Product savedProduct = productRepository.findById(productId).orElseThrow(
+            ()-> new ResourceNotFoundException("Product","Product ID", productId));
+        //upload image to the project //take the name of the image uploaded
+        String path = "images/";
+        String imageName = uploadImage(path, file);
+        //save to the db
+        savedProduct.setImage(imageName);
+        Product updatedProduct = productRepository.save(savedProduct);
+        return mapper.map(updatedProduct, ProductDTO.class);
+    }
+
+    private String uploadImage(String path, MultipartFile file) throws IOException {
+       //Take original file name
+        String originalFileName = file.getOriginalFilename();
+       //Create the unique random id
+        String uniqueId = UUID.randomUUID().toString();
+       //random id + file extention
+        String imageExtention = originalFileName.substring(originalFileName.lastIndexOf("."));
+        String newImageName = uniqueId.concat(imageExtention);
+       //Define the file path with the file name
+        String filePath = path+File.separator+newImageName;
+       //Create new folder (if not already exist)
+        File dir = new File(path);
+        if(!dir.exists()){
+            dir.mkdir();
+        }
+        // File copy to that path
+        Files.copy(file.getInputStream(), Paths.get(filePath));
+       // return the String value of image name
+       return newImageName;
     }
 }
