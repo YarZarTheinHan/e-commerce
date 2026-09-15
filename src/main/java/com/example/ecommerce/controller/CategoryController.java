@@ -42,7 +42,7 @@ public class CategoryController {
     public ResponseEntity<CategoryResponseDTO> getAllCategories(
         @RequestParam(name = "pageSize", defaultValue=AppConstant.PAGE_SIZE, required = false) Integer pageSize,
         @RequestParam(name = "pageNumber", defaultValue=AppConstant.PAGE_NUMBER, required = false) Integer pageNumber,
-        @RequestParam(name = "sortBy", defaultValue = AppConstant.SORT_BY, required = false) String sortBy,
+        @RequestParam(name = "sortBy", defaultValue = AppConstant.SORT_BY_CATEGORY_ID, required = false) String sortBy,
         @RequestParam(name = "sortOrder", defaultValue = AppConstant.SORT_ORDER) String sortOrder
     ) {
         CategoryResponseDTO categoryResponse = categoryService.getAllCategories(pageSize, pageNumber, sortBy, sortOrder);

@@ -10,7 +10,7 @@ import com.example.ecommerce.payload.ProductResponseDTO;
 public interface ProductService {
      ProductDTO addProduct(Long categoryId,ProductDTO productDTO);
 
-     ProductResponseDTO getAllProducts();
+     ProductResponseDTO getAllProducts(Integer pageSize, Integer pageNumber, String sortBy, String sortOrder);
 
      ProductResponseDTO getProductsByCategory(Long categoryId);
 

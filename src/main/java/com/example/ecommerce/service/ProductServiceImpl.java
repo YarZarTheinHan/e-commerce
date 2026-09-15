@@ -6,6 +6,10 @@ import java.util.List;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -57,16 +61,26 @@ public class ProductServiceImpl implements ProductService{
             return mapper.map(savedProduct, ProductDTO.class);
     }
 
-    public ProductResponseDTO getAllProducts(){
-        List<Product> product = productRepository.findAll();
-        boolean isEmpty = product.isEmpty();
-        if(!isEmpty){
+    public ProductResponseDTO getAllProducts(Integer pageSize, Integer pageNumber, String sortBy, String sortOrder){
+        Sort order = sortOrder.equalsIgnoreCase("acs") ?
+        Sort.by(sortBy).ascending():Sort.by(sortBy).descending();
+
+        Pageable pageDetail = PageRequest.of(pageNumber,pageSize,order);
+        Page<Product> pageProduct = productRepository.findAll(pageDetail);
+
+        List<Product> product = pageProduct.getContent();
+        
+        if(!product.isEmpty()){
             List<ProductDTO> productDTOs = product.stream().map(products -> mapper.map(products, ProductDTO.class)).toList();
             ProductResponseDTO productResponseDTO = new ProductResponseDTO();
             productResponseDTO.setContent(productDTOs);
+            productResponseDTO.setLastPage(pageProduct.isLast());
+            productResponseDTO.setPageNumber(pageNumber);
+            productResponseDTO.setPageSize(pageSize);
+            productResponseDTO.setTotalElement(pageProduct.getTotalElements());
+            productResponseDTO.setTotalPages(pageProduct.getTotalPages());
             return productResponseDTO;
         } throw new APIException("Products does not exist");
-        
     }
 
     @Override
