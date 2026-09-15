@@ -18,27 +18,25 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.example.ecommerce.exceptions.ResourceNotFoundException;
-import com.example.ecommerce.model.Product;
 import com.example.ecommerce.payload.ProductDTO;
 import com.example.ecommerce.payload.ProductResponseDTO;
 import com.example.ecommerce.service.ProductService;
+
+import jakarta.validation.Valid;
 
 @RestController 
 @RequestMapping("/api")
 public class ProductController {
 
-    private final ProductRepository productRepository;
     final ProductService productService;
 
-    ProductController(ProductService productService, ProductRepository productRepository) {
+    ProductController(ProductService productService) {
         this.productService = productService;
-        this.productRepository = productRepository;
     }
 
     @PostMapping("/admin/categories/{categoryId}/product")
     public ResponseEntity<ProductDTO> addProduct(@PathVariable Long categoryId,
-                                                @RequestBody  ProductDTO productDTO){
+                                                @Valid @RequestBody  ProductDTO productDTO){
         ProductDTO savedProductDTO = productService.addProduct(categoryId, productDTO);
         return new ResponseEntity<>(savedProductDTO, HttpStatus.CREATED);
     }
@@ -62,9 +60,9 @@ public class ProductController {
     }
 
     @PutMapping("/admin/products/{productId}")
-    public ResponseEntity<ProductDTO> updateProducts(@RequestBody ProductDTO productDTO, @PathVariable Long productId){
+    public ResponseEntity<ProductDTO> updateProducts(@Valid @RequestBody ProductDTO productDTO, @PathVariable Long productId){
         ProductDTO savedProductDTO = productService.updateProducts(productDTO, productId);
-        return new ResponseEntity<>(productDTO, HttpStatus.OK);
+        return new ResponseEntity<>(savedProductDTO, HttpStatus.OK);
     }
 
     @DeleteMapping("/admin/products/{productId}")

@@ -4,7 +4,6 @@ import java.io.IOException;
 
 import org.springframework.web.multipart.MultipartFile;
 
-import com.example.ecommerce.model.Product;
 import com.example.ecommerce.payload.ProductDTO;
 import com.example.ecommerce.payload.ProductResponseDTO;
 
