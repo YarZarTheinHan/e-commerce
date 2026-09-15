@@ -84,25 +84,43 @@ public class ProductServiceImpl implements ProductService{
     }
 
     @Override
-    public ProductResponseDTO getProductsByCategory(Long categoryId) {
+    public ProductResponseDTO getProductsByCategory(Long categoryId, Integer pageSize, Integer pageNumber, String sortBy, String sortOrder) {
        Category category = categoryRepository.findById(categoryId).
        orElseThrow( ()-> new ResourceNotFoundException("Category", "CategoryID",categoryId));
 
-       List<Product> productByCategory = productRepository.findByCategoryOrderByPriceAsc(category);
+       Sort order = sortOrder.equalsIgnoreCase("acs")? 
+       Sort.by(sortBy).ascending(): Sort.by(sortBy).descending();
+
+       Pageable pageDetail = PageRequest.of(pageNumber, pageSize, order);
+
+       Page<Product> productByCategory = productRepository.findByCategory(category,pageDetail);
        boolean isEmpty =productByCategory.isEmpty();
        if(isEmpty){
         throw new APIException("No product exist in this category!");
        } 
+
+       //Page<Product>  products = productRepository.findAll(pageDetail);
+
        List<ProductDTO> productDTOs = productByCategory.stream()
                             .map(products->mapper.map(products, ProductDTO.class)).toList();
             ProductResponseDTO productResponseDTO = new ProductResponseDTO();
             productResponseDTO.setContent(productDTOs);
+            productResponseDTO.setPageNumber(pageNumber);
+            productResponseDTO.setPageSize(pageSize);
+            productResponseDTO.setLastPage(productByCategory.isLast());
+            productResponseDTO.setTotalElement(productByCategory.getTotalElements());
+            productResponseDTO.setTotalPages(productByCategory.getTotalPages());
+
             return productResponseDTO;
     }
 
     @Override
-    public ProductResponseDTO searchProductByKeywords(String keyword) {
-        List<Product> products = productRepository.findByProductNameLikeIgnoreCase(keyword);
+    public ProductResponseDTO searchProductByKeywords(String keyword, Integer pageSize, Integer pageNumber, String sortBy, String sortOrder) {
+        Sort order = sortOrder.equalsIgnoreCase("asc")?
+        Sort.by(sortBy).ascending():Sort.by(sortBy).descending();
+
+        Pageable pageDetail = PageRequest.of(pageNumber, pageSize, order);
+        Page<Product> products = productRepository.findByProductNameLikeIgnoreCase(keyword,pageDetail);
         boolean isEmpty = products.isEmpty();
         if(isEmpty){
             throw new APIException("Product Not Found That You Search!");
@@ -112,6 +130,12 @@ public class ProductServiceImpl implements ProductService{
 
         ProductResponseDTO responseDTO = new ProductResponseDTO();
         responseDTO.setContent(productDTOs);
+        responseDTO.setPageNumber(pageNumber);
+        responseDTO.setPageSize(pageSize);
+        responseDTO.setLastPage(products.isLast());
+        responseDTO.setTotalElement(products.getTotalElements());
+        responseDTO.setTotalPages(products.getTotalPages());
+
         return responseDTO;
     }
 

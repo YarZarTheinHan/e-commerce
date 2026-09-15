@@ -54,14 +54,24 @@ public class ProductController {
     }
 
     @GetMapping("/public/categories/{categoryId}/products")
-    public ResponseEntity<ProductResponseDTO> getProductsByCategoryId(@PathVariable Long categoryId){
-        ProductResponseDTO productResponseDTO = productService.getProductsByCategory(categoryId);
+    public ResponseEntity<ProductResponseDTO> getProductsByCategoryId(@PathVariable Long categoryId,
+        @RequestParam(name = "pageSize", defaultValue= AppConstant.PAGE_SIZE, required = false) Integer pageSize,
+        @RequestParam (name = "pageNumber", defaultValue = AppConstant.PAGE_NUMBER, required = false) Integer pageNumber,
+        @RequestParam(name = "sortBy", defaultValue = AppConstant.SORT_BY_PRODUCT_ID, required = false) String sortBy,
+        @RequestParam(name = "sortOrder", defaultValue = AppConstant.SORT_ORDER, required = false) String sortOrder
+    ){
+        ProductResponseDTO productResponseDTO = productService.getProductsByCategory(categoryId, pageSize, pageNumber, sortBy, sortOrder);
         return new ResponseEntity<>(productResponseDTO, HttpStatus.OK);
     }
 
     @GetMapping("/public/products/keyword/{keyword}")
-    public ProductResponseDTO searchProductByKeywords(@PathVariable String keyword){
-        ProductResponseDTO searchedProducts = productService.searchProductByKeywords("%"+keyword+"%");
+    public ProductResponseDTO searchProductByKeywords(@PathVariable String keyword,
+        @RequestParam(name = "pageSize", defaultValue= AppConstant.PAGE_SIZE, required = false) Integer pageSize,
+        @RequestParam (name = "pageNumber", defaultValue = AppConstant.PAGE_NUMBER, required = false) Integer pageNumber,
+        @RequestParam(name = "sortBy", defaultValue = AppConstant.SORT_BY_PRODUCT_ID, required = false) String sortBy,
+        @RequestParam(name = "sortOrder", defaultValue = AppConstant.SORT_ORDER, required = false) String sortOrder
+    ){
+        ProductResponseDTO searchedProducts = productService.searchProductByKeywords("%"+keyword+"%",pageSize, pageNumber, sortBy, sortOrder);
         return searchedProducts;
     }
 
