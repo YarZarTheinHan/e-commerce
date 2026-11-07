@@ -13,8 +13,8 @@ import java.util.stream.Collectors;
 
 public class CustomUserDetails implements UserDetails {
 
-    private final Long userId; // Matches your entity field name
-    private final String userName; // Matches your entity field name
+    private final Long userId;
+    private final String userName;
     private final String email;
     
     @JsonIgnore
