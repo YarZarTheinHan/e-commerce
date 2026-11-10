@@ -1,17 +1,24 @@
 package com.example.ecommerce.controller;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.mvc.method.annotation.HttpHeadersReturnValueHandler;
+import org.springframework.http.HttpHeaders;
 
 import com.example.ecommerce.security.jwt.JWTUtils;
 import com.example.ecommerce.security.request.LoginRequest;
@@ -19,10 +26,16 @@ import com.example.ecommerce.security.request.RegisterRequest;
 import com.example.ecommerce.security.response.MessageResponse;
 import com.example.ecommerce.security.response.UserInfoResponse;
 import com.example.ecommerce.security.services.CustomUserDetails;
+import com.example.ecommerce.model.AppRole;
+import com.example.ecommerce.model.Role;
+import com.example.ecommerce.model.User;
+import com.example.ecommerce.repository.RoleRepository;
 import com.example.ecommerce.repository.UserRepository;
 
 import jakarta.validation.Valid;
 
+@RestController 
+@RequestMapping("api/auth")
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;
@@ -31,10 +44,17 @@ public class AuthController {
 
     private final UserRepository userRepo;
 
-    AuthController(AuthenticationManager authenticationManager, JWTUtils jwtUtils, UserRepository userRepo) {
+    private final PasswordEncoder encoder;
+
+    private final RoleRepository roleRepository;
+
+    AuthController(AuthenticationManager authenticationManager, JWTUtils jwtUtils, UserRepository userRepo, 
+        PasswordEncoder encoder, RoleRepository roleRepository) {
         this.authenticationManager = authenticationManager;
         this.jwtUtils = jwtUtils;
         this.userRepo = userRepo;
+        this.encoder = encoder;
+        this.roleRepository = roleRepository;
     }
 
     @PostMapping("/signin")
@@ -52,7 +72,7 @@ public class AuthController {
     // Cast explicitly to CustomUserDetails
     CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
 
-    String jwtToken = jwtUtils.generateTokenFromUsername(userDetails.getUsername());
+    ResponseCookie jwtTokenCookie = jwtUtils.generateJwtCookie(userDetails);
 
     List<String> roles = userDetails.getAuthorities().stream()
             .map(GrantedAuthority::getAuthority)
@@ -60,12 +80,12 @@ public class AuthController {
 
     UserInfoResponse responseBody = new UserInfoResponse(
             userDetails.getUserId(),
-            jwtToken,
             userDetails.getUsername(),
             roles
     );
 
-    return ResponseEntity.ok(responseBody);
+    return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE,
+        jwtTokenCookie.toString()).body(responseBody);
     }
 
     @PostMapping("/signup")
@@ -77,6 +97,43 @@ public class AuthController {
         if(userRepo.existsByEmail(registerRequest.getEmail())){
            return ResponseEntity.badRequest().body(new MessageResponse("Error: Email is already registered!"));
         }
-        return null;
+
+        User user = new User();
+        user.setUserName(registerRequest.getUsername());
+        user.setEmail(registerRequest.getEmail());
+        user.setPassword(encoder.encode(registerRequest.getPassword()));
+
+        Set<String> strRoles = registerRequest.getRole();
+        Set<Role> roles = new HashSet<>();
+
+        if(strRoles == null){
+            Role userRole = roleRepository.findByRoleName(AppRole.ROLE_USER).orElseThrow(()->new RuntimeException("Error: Role is not found"));
+            roles.add(userRole);
+        } else {
+            strRoles.forEach(role->{
+                switch (role) {
+                    case "admin":
+                        Role adminRole = roleRepository.findByRoleName(AppRole.ROLE_ADMIN)
+                        .orElseThrow(()-> new RuntimeException("Error: Role is not found!"));
+                        roles.add(adminRole);
+                        break;
+
+                    case "seller":
+                        Role sellerRole = roleRepository.findByRoleName(AppRole.ROLE_SELLER)
+                        .orElseThrow(()-> new RuntimeException("Error: Role is not found!"));
+                        roles.add(sellerRole);
+                        break;
+                
+                    default:
+                        Role userRole = roleRepository.findByRoleName(AppRole.ROLE_USER)
+                        .orElseThrow(()-> new RuntimeException("Error: Role is not found!"));
+                        roles.add(userRole);
+                        break;
+                }
+            });
+        }
+        user.setRoles(roles);
+        userRepo.save(user);
+        return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
 }

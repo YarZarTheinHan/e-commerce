@@ -11,7 +11,6 @@ import java.util.List;
 @AllArgsConstructor
 public class UserInfoResponse {
     private Long id;
-    private String token;
     private String username;
     private List<String> roles;
 }
