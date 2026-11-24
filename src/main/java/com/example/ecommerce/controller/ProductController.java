@@ -1,8 +1,5 @@
 package com.example.ecommerce.controller;
 
-
-import com.example.ecommerce.repository.ProductRepository;
-
 import java.io.IOException;
 
 import org.springframework.http.HttpStatus;
